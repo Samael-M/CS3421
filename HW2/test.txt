@@ -1,0 +1,8 @@
+.text
+#comment
+#L1: mfhi $s1
+#mult $s0,$t7
+div $s1,$v1
+.data
+n: .word 0
+# valgrind --leak-check=full --show-leak-kinds=all --verbose ./assem < test.txt
