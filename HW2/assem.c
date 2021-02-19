@@ -19,7 +19,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-typedef enum{ false, true} bool;
+typedef enum
+{
+    false,
+    true
+} bool;
 
 #define MAXLINE 80
 #define MAXNAME 10
@@ -62,7 +66,8 @@ union
     } JType;
 } j;
 
-typedef struct {
+typedef struct
+{
     char name[10];
     int location;
 } Labels;
@@ -73,7 +78,7 @@ typedef struct {
 */
 int find_register_location(char *reg)
 {
-    if(strcmp(reg, "zero") == 0)
+    if (strcmp(reg, "zero") == 0)
     {
         return 0;
     }
@@ -139,32 +144,32 @@ int find_register_location(char *reg)
     }
 }
 
-
 int main(int argc, char **argv)
 {
     bool data = false;
 
     char file[32768][80];
-    char directive[5][10], line[MAXLINE], oper[MAXNAME], rs[MAXREG], rt[MAXREG], rd[MAXREG], label[10], junk[10];
+    char directive[32768][10], line[MAXLINE], oper[MAXNAME], rs[MAXREG], rt[MAXREG], rd[MAXREG], label[11], junk[11];
     int lineNum = 0;
-    int data_words = 0; 
-    int instructions = 0; 
+    int data_words = 0;
+    int instructions = 0;
     int imm = 0;
     int labelCount = 0;
 
-    Labels *labelNames;
-    labelNames = (Labels *) malloc(32768 * sizeof(Labels));
+    Labels labelNames[32768];
 
     while (fgets(line, MAXLINE, stdin))
     {
-        
-        if (strcmp(".data\n", line) == 0)
+
+        sscanf(line, ".%4s", label);
+        if (strcmp("data", label) == 0)
         {
             data = true;
         }
         else if (line[0] != '#' && data == true)
         {
             strcpy(directive[data_words], line);
+            printf("t\n");
             data_words++;
         }
 
@@ -172,7 +177,8 @@ int main(int argc, char **argv)
         char str[80];
         //get rid of label from line and store it for later use, along with adress
         sscanf(line, "%11s", label);
-        if(label[strlen(label) - 1] == ':') {
+        if (label[strlen(label) - 1] == ':') 
+        {
             sscanf(line, "%10[^:]: %[^#]", label, str);
             strcpy(line, str);
 
@@ -180,8 +186,10 @@ int main(int argc, char **argv)
             labelNames[labelCount].location = lineNum;
             labelCount++;
         }
-
-        if (line[0] == '#' || strcmp(".text\n", line) == 0) { /*skip line*/ }
+        sscanf(line, ".%4s", label);
+        if (line[0] == '#' || strcmp("text", label) == 0)
+        { /*skip line*/
+        }
         else if (line[0] != '#' && data == false)
         {
             instructions++;
@@ -191,10 +199,13 @@ int main(int argc, char **argv)
     }
     printf("%d %d\n", instructions, data_words);
 
-    for (int i = 0; i < lineNum; i++) {
+    for (int i = 0; i < lineNum; i++)
+    {
         /* First three checks, check for R type commands based on how many argumetns they take */
-        if (sscanf(file[i], "%10s $%5[^,],$%5[^,],$%5s", oper, rd, rs, rt) == 4) {
-            if (strcmp("addu", oper) == 0) {
+        if (sscanf(file[i], "%10s $%5[^,],$%5[^,],$%5s", oper, rd, rs, rt) == 4)
+        {
+            if (strcmp("addu", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
@@ -202,27 +213,26 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x21;
             }
-            else if (strcmp("and", oper) == 0) {
+            else if (strcmp("and", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
                 r.RType.rd = find_register_location(rd);
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x24;
-               // printf("op: %s -> %x, rs: %s -> %x, rt: %s -> %x, rd: %s -> %x, shamt: %x, funct: %x\n",
-                    //oper, r.RType.opcode, rs, r.RType.rs, rt, r.RType.rt, rd, r.RType.rd, r.RType.shamt, r.RType.funct);
             }
-            else if (strcmp("or", oper) == 0) {
+            else if (strcmp("or", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
                 r.RType.rd = find_register_location(rd);
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x25;
-               // printf("op: %s -> %x, rs: %s -> %x, rt: %s -> %x, shamt: %x, funct: %x\n",
-                 //oper, r.RType.opcode, rs, r.RType.rs, rt, r.RType.rt, r.RType.shamt, r.RType.funct);
             }
-            else if (strcmp("slt", oper) == 0) {
+            else if (strcmp("slt", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
@@ -230,7 +240,8 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x2a;
             }
-            else if (strcmp("subu", oper) == 0) {
+            else if (strcmp("subu", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
@@ -240,8 +251,10 @@ int main(int argc, char **argv)
             }
             printf("%08x\n", r.x);
         }
-        else if (sscanf(file[i], "%10s $%5[^,],$%5[^,]%s", oper, rs, rt, junk) == 3) {
-            if (strcmp("mult", oper) == 0) {
+        else if (sscanf(file[i], "%10s $%5[^,],$%5[^,]%s", oper, rs, rt, junk) == 3)
+        {
+            if (strcmp("mult", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
@@ -249,7 +262,8 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x18;
             }
-            else if (strcmp("div", oper) == 0) {
+            else if (strcmp("div", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = find_register_location(rs);
                 r.RType.rt = find_register_location(rt);
@@ -257,13 +271,16 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x1a;
             }
-            else {
+            else
+            {
                 printf("Error1, command not recognized: %s\n", oper);
             } //not recognized command
             printf("%08x\n", r.x);
         }
-        else if (sscanf(file[i], "%10s $%5[^,]%s", oper, rd, junk) == 2) {
-            if (strcmp("mfhi", oper) == 0) {
+        else if (sscanf(file[i], "%10s $%5[^,]%s", oper, rd, junk) == 2)
+        {
+            if (strcmp("mfhi", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = 0x0;
                 r.RType.rt = 0x0;
@@ -271,7 +288,8 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x10;
             }
-            else if (strcmp("mflo", oper) == 0) {
+            else if (strcmp("mflo", oper) == 0)
+            {
                 r.RType.opcode = 0x0;
                 r.RType.rs = 0x0;
                 r.RType.rt = 0x0;
@@ -279,88 +297,115 @@ int main(int argc, char **argv)
                 r.RType.shamt = 0x0;
                 r.RType.funct = 0x12;
             }
-            else {
+            else
+            {
                 printf("Error2, command not recognized: %s\n", oper);
             } //not recognized command
             printf("%08x\n", r.x);
         }
         /* Next set of if checks go over I and J type instructions. I check each instruction independantly */
-        else if(strcmp(oper, "j") == 0) {
+        else if (strcmp(oper, "j") == 0)
+        {
             sscanf(file[i], "%s %10s[^#]", oper, label);
             j.JType.opcode = 0x2;
-            for(int k = 0 ; k < labelCount; k++) {
-                if(strcmp(labelNames[k].name, label) == 0) {
+            for (int k = 0; k < labelCount; k++)
+            {
+                if (strcmp(labelNames[k].name, label) == 0)
+                {
                     j.JType.immediate = labelNames[k].location;
                 }
             }
             printf("%08x\n", j.x);
         }
-        else if(strcmp(oper, "bne") == 0) {
-            sscanf(file[i], "%10s $%5[^,],$%5[^,],%5s", oper, rs, rt, label);
+        else if (strcmp(oper, "bne") == 0)
+        {
+            sscanf(file[i], "%10s $%5[^,],$%5[^,],%10s", oper, rs, rt, label);
             ii.IType.opcode = 0x5;
             ii.IType.rs = find_register_location(rs);
             ii.IType.rt = find_register_location(rt);
-           
-            for(int j = 0 ; j < labelCount; j++) {
-                if(strcmp(labelNames[j].name, label) == 0) {
+
+            for (int j = 0; j < labelCount; j++)
+            {
+                if (strcmp(labelNames[j].name, label) == 0)
+                {
                     ii.IType.immediate = labelNames[j].location - i;
                 }
             }
             printf("%08x\n", ii.x);
         }
-        else if(strcmp(oper, "beq") == 0) {
-            sscanf(file[i], "%10s $%5[^,],$%5[^,],%5s", oper, rs, rt, label);
+        else if (strcmp(oper, "beq") == 0)
+        {
+            sscanf(file[i], "%10s $%5[^,],$%5[^,],%10s", oper, rs, rt, label);
             ii.IType.opcode = 0x4;
             ii.IType.rs = find_register_location(rs);
             ii.IType.rt = find_register_location(rt);
-           
-            for(int j = 0 ; j < labelCount; j++) {
-                if(strcmp(labelNames[j].name, label) == 0) {
+
+            for (int j = 0; j < labelCount; j++)
+            {
+                if (strcmp(labelNames[j].name, label) == 0)
+                {
                     ii.IType.immediate = labelNames[j].location - i;
                 }
             }
             printf("%08x\n", ii.x);
         }
-        else if(strcmp(oper, "lw") == 0) {
+        else if (strcmp(oper, "lw") == 0)
+        {
             sscanf(file[i], "%10s $%5[^,],%10[^(]($%[^)]", oper, rt, label, rs);
             ii.IType.opcode = 0x23;
             ii.IType.rs = find_register_location(rs);
             ii.IType.rt = find_register_location(rt);
-            if(isdigit(label[0]) != 0) { ii.IType.immediate = atoi(label); }
-            else {
-                for(int j = 0 ; j < data_words; j++) {
+            if (isdigit(label[0]) != 0)
+            {
+                ii.IType.immediate = atoi(label);
+            }
+            else
+            {
+                for (int j = 0; j < data_words; j++)
+                {
                     char temp1[10];
                     char temp2[5];
                     char temp3[5];
+                    //get label, directive and number from .data section
                     sscanf(directive[j], "%5[^:]: .%5s %s", temp1, temp2, temp3);
-                    if(strcmp(temp1, label) == 0) {
+                    if (strcmp(temp1, label) == 0)
+                    {
                         ii.IType.immediate = atoi(temp3);
                     }
                 }
             }
-            
+
             printf("%08x\n", ii.x);
         }
-        else if(strcmp(oper, "sw") == 0) {
+        else if (strcmp(oper, "sw") == 0)
+        {
             sscanf(file[i], "%10s $%5[^,],%10[^(]($%[^)]", oper, rt, label, rs);
             ii.IType.opcode = 0x2b;
             ii.IType.rs = find_register_location(rs);
             ii.IType.rt = find_register_location(rt);
-            if(isdigit(label[0]) != 0) { ii.IType.immediate = atoi(label); }
-            else {
-                for(int j = 0 ; j < data_words; j++) {
+            if (isdigit(label[0]) != 0)
+            {
+                ii.IType.immediate = atoi(label);
+            }
+            else
+            {
+                for (int j = 0; j < data_words; j++)
+                {
                     char temp1[10];
                     char temp2[5];
                     char temp3[5];
+                    //get label, directive and number from .data section
                     sscanf(directive[j], "%5[^:]: .%5s %s", temp1, temp2, temp3);
-                    if(strcmp(temp1, label) == 0) {
+                    if (strcmp(temp1, label) == 0)
+                    {
                         ii.IType.immediate = atoi(temp3);
                     }
                 }
             }
             printf("%x\n", ii.x);
         }
-        else if(strcmp(oper, "addiu") == 0) {
+        else if (strcmp(oper, "addiu") == 0)
+        {
             sscanf(file[i], "%10s $%5[^,],$%5[^,],%s", oper, rt, rs, junk);
             ii.IType.opcode = 0x9;
             ii.IType.rs = find_register_location(rs);
@@ -368,14 +413,15 @@ int main(int argc, char **argv)
             ii.IType.immediate = atoi(junk);
             printf("%x\n", ii.x);
         }
-        else if(strcmp(oper, "syscall") == 0) {
+        else if (strcmp(oper, "syscall") == 0)
+        {
             printf("0000000c\n");
         }
-        else {
+        else
+        {
             printf("Error4, not recognized command: %s\n", oper); //not recognized command
             return 0;
         }
     }
-    free(labelNames);
     return 0;
 }

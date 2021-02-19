@@ -15,8 +15,7 @@ j L1 # goto L1
 L2: addu $a0,$s0,$zero # a0 = s0
 addiu $v0,$zero,1 # v0 = print value cmd
 syscall # print(a0)
-addiu $v0,$zero,10 # v0 = exit cmd
+L3: addiu $v0,$zero,10 # v0 = exit cmd
 syscall # exit()
 .data
-n: .word 0
-
+n: .word 0,1,3
